@@ -106,8 +106,9 @@ def particle_filter_worker(ip, px, pw, z, u, dt):
         phi = pi_2_pi(np.arctan2(dy, dx) - x[3, 0])
         phi_z = pi_2_pi(phi - y[1]) + np.pi / 2.0
 
-        w = w * gauss_likelihood(delta_z, math.sqrt(Q[0, 0]))
-        w = w + gauss_likelihood(phi_z, math.sqrt(Q[1, 1]))
+        p_dz = gauss_likelihood(delta_z, math.sqrt(Q[0, 0]))
+        p_dphi = gauss_likelihood(phi_z, math.sqrt(Q[1, 1]))
+        w = w * (p_dz + p_dphi)
 
     px[:, ip] = x[:, 0]
     pw[0, ip] = w
