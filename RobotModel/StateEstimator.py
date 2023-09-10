@@ -3,8 +3,8 @@ import numpy as np
 from . import generate_noisy_control, motion_model
 from . import get_noisy_reading, pi_2_pi
 from concurrent.futures import ThreadPoolExecutor
-Q = np.diag([0.2, np.deg2rad(5.0)]) ** 2  # range error
-
+Q = np.diag([0.02, np.deg2rad(5.0)]) ** 2  # range error
+np.random.seed(1234)
 
 def gauss_likelihood(x, sigma):
     p = 1.0 / math.sqrt(2.0 * math.pi * sigma ** 2) * \
