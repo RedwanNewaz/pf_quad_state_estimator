@@ -134,12 +134,10 @@ def main():
 
         plt.cla()
         for i, z in enumerate(Z):
-            X = [x_true[0, 0], z[2]]
-            Y = [x_true[1, 0], z[3]]
-            x_noise = get_noisy_reading(x_true, z[:2])
+
+            x_noise = get_noisy_reading(x_true, z[:3])
             Xn = [x_true[0, 0], x_noise[0]]
             Yn = [x_true[1, 0], x_noise[1]]
-            # plt.plot( X, Y, '--k')
             plt.plot(Xn, Yn, '--k')
 
         plt.plot(px[0, :], px[1, :], ".r", alpha=0.2)
