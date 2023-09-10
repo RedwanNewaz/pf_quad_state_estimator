@@ -57,7 +57,7 @@ def rot_mat_2d(angle):
     return Rot.from_euler('z', angle).as_matrix()[0:2, 0:2]
 
 def calc_input():
-    SIM_TIME = 100  # total simulation time
+    SIM_TIME = 200  # total simulation time
     N = SIM_TIME // 4  # each arm traversing time
     v = L / (N * DT)
     u_f = np.array([[0, v, 0, 0] for _ in range(N)])
@@ -134,10 +134,9 @@ def main():
 
         plt.cla()
         for i, z in enumerate(Z):
-
             x_noise = get_noisy_reading(x_true, z[:3])
-            Xn = [x_true[0, 0], x_noise[0]]
-            Yn = [x_true[1, 0], x_noise[1]]
+            Xn = [x_est[0, 0], x_noise[0]]
+            Yn = [x_est[1, 0], x_noise[1]]
             plt.plot(Xn, Yn, '--k')
 
         plt.plot(px[0, :], px[1, :], ".r", alpha=0.2)
