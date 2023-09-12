@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from math import sin, cos
 from . import motion_model
 
 #  Simulation parameter
@@ -70,7 +71,8 @@ def observation_model(x_true, u, landmarks, dt, fov):
     triangle = fov_triangle(x_true, fov)
 
     # add noise to sensor r-theta
-    z = np.zeros((0, 3))
+    z = np.zeros((0, 4))
+    z_true = np.zeros((0, 4))
 
     for i, landmark in enumerate(landmarks):
 
@@ -80,6 +82,7 @@ def observation_model(x_true, u, landmarks, dt, fov):
         dx = x_true[0, 0] - landmark[0, 0]
         dy = x_true[1, 0] - landmark[1, 0]
         dz = x_true[2, 0] - landmark[2, 0]
+
 
         d = math.hypot(dx, dy, dz)
 
@@ -101,10 +104,13 @@ def observation_model(x_true, u, landmarks, dt, fov):
 
 
 
-        zi = np.array([dn, phin, thetan])
+        zi = np.array([dn, phin, thetan, i])
         z = np.vstack((z, zi))
 
-    return x_true, z
+        zi_true = np.array([d, phi, theta, i])
+        z_true = np.vstack((z_true, zi_true))
+
+    return x_true, z, z_true
 
 
 
@@ -127,5 +133,52 @@ def get_noisy_reading(x, zd):
 
 
 
+def convert_spherical_to_cartesian(Z):
+    r, phi, theta = Z[:3]
+    phi =  pi_2_pi(phi)
+    x = r * np.cos(phi)
+    y = r * np.sin(phi)
+    z = r * np.cos(theta)
+    return np.array([x, y, z, 0])
+
+def estimate_control(Z_t, Z_t_1, dt):
+    x_t = convert_spherical_to_cartesian(Z_t)
+    x_t_1 = convert_spherical_to_cartesian(Z_t_1)
+    v = (x_t - x_t_1) / dt
+    return v.reshape((4, 1))
 
 
+
+def estimate_zx(Z, landmarks, heading):
+    def calc_rho(rho, z_rho, beta):
+        r = (rho ** 2) + (z_rho ** 2) - 2 * rho * z_rho * math.cos(beta)
+        r = math.sqrt(r)
+        return r
+
+    def calc_theta(alpha, z_rho, rho, beta):
+        gamma = z_rho * math.sin(beta) / rho
+        gamma = math.asin(gamma)
+        return alpha - gamma
+
+    markers = np.squeeze(landmarks)
+
+    X = np.zeros((0, 4))
+    for z in Z:
+        i = int(z[-1])
+        z_rho, phi, _ = z[:3]
+        alpha = math.atan2(markers[i, 1], markers[i, 0])
+        rho = np.linalg.norm(markers[i, :2])
+        # z_beta = pi_2_pi(pi_2_pi(phi - heading) - alpha)
+        z_beta = pi_2_pi(phi - alpha - heading)
+
+        # estimate robot coord
+        r_hat = calc_rho(rho, z_rho, z_beta)
+        theta_hat = calc_theta(alpha, z_rho, r_hat, z_beta)
+        x = r_hat * math.cos(theta_hat)
+        y = r_hat * math.sin(theta_hat)
+        z = 1.2
+        xx = np.array([x, y, z, heading])
+        X = np.vstack((X, xx))
+
+    robot = X.mean(axis=0)
+    return robot.reshape((4, 1))

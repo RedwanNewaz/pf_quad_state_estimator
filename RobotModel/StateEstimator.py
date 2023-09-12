@@ -47,7 +47,7 @@ def re_sampling(px, pw, NP):
 
     return px, pw
 
-#
+
 # def pf_localization(px, pw, z, u, dt, NP):
 #     """
 #     Localization with Particle filter
