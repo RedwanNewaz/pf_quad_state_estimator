@@ -2,15 +2,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 from RobotModel import observation_model, get_noisy_reading
-from RobotModel import  estimate_zx
-from RobotModel import pf_localization
+from RobotModel import ParticleFilter
 from scipy.spatial.transform import Rotation as Rot
 
 NP = 1000  # Number of Particle
 DT = 0.1  # time tick [s]
 STATE_DIM = 8 # state variable dimension
 CTRL_DIM = 4 # control variable dimension
-NUM_MAX_THREADS = 6
+
 L = 6 # length of workspace [m]
 
 
@@ -101,37 +100,22 @@ def main():
     x_true = np.zeros((STATE_DIM, 1))
     x_true[3, 0] = np.pi / 2.0 # init heading 90
 
-
     FOV = np.rad2deg(120)
+    x_true, Z, Z_true = observation_model(x_true, np.zeros((4, 1)), tag_id, DT, FOV)
+    pf = ParticleFilter(tag_id, Z, STATE_DIM, NP, DT)
 
-    SIM_TIME = 200  # total simulation time
-    N = SIM_TIME // 4  # each arm traversing time
-    v = L / (N * DT)
 
-    px = np.zeros((STATE_DIM, NP))  # Particle store
-    pw = np.zeros((1, NP)) + 1.0 / NP  # Particle weight
-
-    z_t_1 = x_true[:4, :].copy()
-    initialized = False
     for u in calc_input():
         x_true, Z, Z_true = observation_model(x_true, u, tag_id, DT, FOV)
 
-        if len(Z):
-            zx = estimate_zx(Z, tag_id, z_t_1[3, 0])
-            dx = zx - z_t_1
-            v = dx / DT
-            print(v.T, u.T)
-            z_t_1 = zx.copy()
-            if(initialized):
-                u = v.copy()
-            initialized = True
-        else:
-            initialized = False
+        cntrl = pf.estimate_control(Z)
+        if cntrl is not None:
+            u = cntrl
+        pf(Z, u)
+        x_est = pf.getState()
+        p_est = pf.getCovariance()
 
-        # u = np.zeros(u.shape)
-        x_est, p_est, px, pw = pf_localization(px, pw, Z, u, DT, NP, NUM_MAX_THREADS)
 
-        # print(x_est)
         plt.cla()
         for i, z in enumerate(Z):
             x_noise = get_noisy_reading(x_true, z[:3])
@@ -140,7 +124,7 @@ def main():
             plt.plot(Xn, Yn, '--k')
 
 
-        plt.plot(px[0, :], px[1, :], ".r", alpha=0.2)
+        # plt.plot(px[0, :], px[1, :], ".r", alpha=0.2)
         plt.scatter(tag_id[:, 0], tag_id[:, 1])
         plt.scatter(x_true[0, 0], x_true[1, 0])
         plt.scatter(x_est[0, 0], x_est[1, 0])

@@ -180,5 +180,5 @@ def estimate_zx(Z, landmarks, heading):
         xx = np.array([x, y, z, heading])
         X = np.vstack((X, xx))
 
-    robot = X.mean(axis=0)
-    return robot.reshape((4, 1))
+
+    return X
