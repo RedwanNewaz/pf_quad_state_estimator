@@ -96,7 +96,8 @@ def observation_model(x_true, u, landmarks, dt, fov):
         # Calculate noisy polar angle (θ) in radians
         # polar angle: 0° ≤ θ ≤ 180° (π rad),
         thetan = theta + np.random.randn() * Q_sim[1, 1] ** 0.5
-        thetan = thetan % np.pi
+        thetan = (thetan) % np.pi
+
 
         # Calculate noisy azimuthal angle (φ) in radians
         # azimuth : 0° ≤ φ < 360° (2π rad).
@@ -165,7 +166,7 @@ def estimate_zx(Z, landmarks, heading):
     X = np.zeros((0, 4))
     for z in Z:
         i = int(z[-1])
-        z_rho, phi, _ = z[:3]
+        z_rho, phi, polar_angle = z[:3]
         alpha = math.atan2(markers[i, 1], markers[i, 0])
         rho = np.linalg.norm(markers[i, :2])
         # z_beta = pi_2_pi(pi_2_pi(phi - heading) - alpha)
@@ -174,9 +175,15 @@ def estimate_zx(Z, landmarks, heading):
         # estimate robot coord
         r_hat = calc_rho(rho, z_rho, z_beta)
         theta_hat = calc_theta(alpha, z_rho, r_hat, z_beta)
+
         x = r_hat * math.cos(theta_hat)
         y = r_hat * math.sin(theta_hat)
-        z = 1.2
+
+        z = -z_rho * math.cos(polar_angle)
+
+        # print(z)
+
+
         xx = np.array([x, y, z, heading])
         X = np.vstack((X, xx))
 
