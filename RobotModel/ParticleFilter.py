@@ -6,7 +6,7 @@ from . import estimate_zx
 from .MotionModel import R_sim
 from concurrent.futures import ThreadPoolExecutor
 Q = np.diag([0.02, np.deg2rad(5.0)]) ** 2  # range error
-np.random.seed(1234)
+# np.random.seed(1234)
 
 def gauss_likelihood(x, sigma):
     p = 1.0 / math.sqrt(2.0 * math.pi * sigma ** 2) * \
