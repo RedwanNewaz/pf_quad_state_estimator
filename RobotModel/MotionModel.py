@@ -1,6 +1,6 @@
 import numpy as np
 
-R_sim = np.diag([1.0, np.deg2rad(30.0)]) ** 2
+R_sim = np.diag([1.0, 1.0, 1.0, np.deg2rad(30.0)]) ** 2
 
 def motion_model(x, u, dt):
     '''
@@ -28,9 +28,10 @@ def motion_model(x, u, dt):
 
 def generate_noisy_control(u):
     # add noise to input
+    # print('main', R_sim)
     ud1 = u[0, 0] + np.random.randn() * R_sim[0, 0] ** 0.5
-    ud2 = u[1, 0] + np.random.randn() * R_sim[0, 0] ** 0.5
-    ud3 = u[2, 0] + np.random.randn() * R_sim[0, 0] ** 0.5
-    ud4 = u[3, 0] + np.random.randn() * R_sim[1, 1] ** 0.5
+    ud2 = u[1, 0] + np.random.randn() * R_sim[1, 1] ** 0.5
+    ud3 = u[2, 0] + np.random.randn() * R_sim[2, 2] ** 0.5
+    ud4 = u[3, 0] + np.random.randn() * R_sim[3, 3] ** 0.5
     ud = np.array([[ud1, ud2, ud3, ud4]]).T
     return ud
