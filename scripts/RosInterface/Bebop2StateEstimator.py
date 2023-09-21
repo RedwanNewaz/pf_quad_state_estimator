@@ -11,6 +11,7 @@ from tf.transformations import euler_from_quaternion
 
 class StateEstimator:
     def __init__(self) -> None:
+        self.heading = np.pi / 2.0
         self.tf_listener = tf.TransformListener()
         self.timer = rospy.Timer(rospy.Duration(0.01), self.listen_transformation)
 
@@ -19,10 +20,17 @@ class StateEstimator:
         z2 = self.get_transformation("camera_base_link", "tag7")
         z3 = self.get_transformation("camera_base_link", "tag4")
 
+        Z = [z1, z2, z3]
+              
+        beta = 0.99
+        for y in Z:
+            if y is not None:
+                mes = y[-1] + np.pi 
+                self.heading = beta * self.heading  + (1 - beta) * mes
+
+
         z = np.zeros((0, 5))
-
-
-        for i, zz in enumerate([z1, z2, z3]):
+        for i, zz in enumerate(Z):
             if zz is not None:
                 # print(i, zz)
                 d = math.hypot(zz[0], zz[1], zz[2])
@@ -30,7 +38,8 @@ class StateEstimator:
                 # phi = pi_2_pi(math.atan2(zz[1], zz[0]) - zz[-1])
                 phi = np.sign(zz[1]) * np.arccos(zz[0] / np.sqrt(zz[0]**2 + zz[1]**2))
 
-                zi = np.array([d, phi, theta, i, np.pi + zz[-1]])
+                # zi = np.array([d, phi, theta, i, zz[-1] + np.pi ])
+                zi = np.array([d, phi, theta, i, self.heading ])
                 # zi = np.array([d, phi, theta, i, zz[3]])
                 z = np.vstack((z, zi))
 

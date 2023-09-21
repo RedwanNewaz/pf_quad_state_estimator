@@ -41,10 +41,6 @@ def estimate_zx(Z, landmarks, heading):
 
     X = np.zeros((0, 4))
 
-    beta = 0.99
-    for z in Z:
-        # heading = min(heading, z[-1])
-        heading = beta * heading  + (1 - beta) * z[-1]
 
     for z in Z:
         i = int(z[-2])
@@ -57,23 +53,30 @@ def estimate_zx(Z, landmarks, heading):
         r_hat = calc_rho(rho, z_rho, z_beta)
         theta_hat = calc_theta(alpha, z_rho, r_hat, z_beta)
 
-        theta_hat = pi_2_pi(theta_hat + 1.57)
+        theta_hat = pi_2_pi(theta_hat + np.pi / 2)
+        
+        # rot =  theta_hat + np.pi / 4 
+        # if z[-1] > np.pi / 2 or z[-1] < -np.pi / 2:
+        #     rot = theta_hat - np.pi / 4    
+        # x = -r_hat * math.sin(rot) + markers[i, 1]
+        # y = -r_hat * math.cos(theta_hat) + markers[i, 0] 
 
-
-        if heading > np.pi / 2 or heading < -np.pi / 2:
+        if z[-1] > np.pi / 2 or z[-1] < -np.pi / 2:
             y = -r_hat * math.cos(theta_hat) + markers[i, 0] 
             x = -r_hat * math.sin(theta_hat) + markers[i, 1]
         else: 
             x = r_hat * math.cos(theta_hat) + markers[i, 1] 
             y = r_hat * math.sin(theta_hat) - markers[i, 0] 
 
+
        
         zz = -z_rho * math.cos(polar_angle) + markers[i, 2]
 
-        print(heading, theta_hat)
+        
 
 
-        xx = np.array([x, y, zz, heading])
+        # xx = np.array([x, y, zz, heading])
+        xx = np.array([x, y, zz, z[-1]])
         X = np.vstack((X, xx))
 
 
