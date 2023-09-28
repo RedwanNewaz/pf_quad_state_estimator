@@ -7,6 +7,7 @@ from visualization_msgs.msg import Marker
 from geometry_msgs.msg import Point
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from scipy.spatial.transform import Rotation as Rot
+from RobotModel import  convert_spherical_to_cartesian
 
 def rot_mat_2d(angle):
     """
@@ -41,7 +42,7 @@ class Bebop2StateViz:
     def __call__(self, state):
         self.position = state[:3]
         self.orientation = quaternion_from_euler(0, 0, state[3] + math.pi/2)
-        # print(state, "STATEVIZ")
+
         bebop_marker = self.populate_marker()
         bebop_marker.pose.orientation.x = self.orientation[0]  # Set the orientation of the marker
         bebop_marker.pose.orientation.y = self.orientation[1]
@@ -124,7 +125,33 @@ class Bebop2StateViz:
         marker.mesh_resource = "package://bebop_description/meshes/bebop_model.stl"
         return marker
     
+    def estimated_landmarks(self, z, xEst):
+        robot_landmark_coord = map(convert_spherical_to_cartesian, z)
+        point_list = []
+        for x in robot_landmark_coord:
+                
+        # self.xEst is not available.
+            x0 = np.squeeze(xEst)[:3]
+            l0 = x0 + x[:3]
+            # print(l0)
+            detectedLandmark = Point()
+            detectedLandmark.x = l0[0]
+            detectedLandmark.y = l0[1]
+            detectedLandmark.z = l0[2]
 
+            robotPosition = Point()
+            robotPosition.x = x0[0]
+            robotPosition.y = x0[1]
+            robotPosition.z = x0[2]
+
+            point_list.append(robotPosition)
+            point_list.append(detectedLandmark)
+            point_list.append(detectedLandmark)
+            point_list.append(robotPosition)
+
+        self.add_observation(point_list)
+    
+    
     def plot_covariance_ellipse(self, xEst, PEst):  # pragma: no cover
         Pxy = PEst[0:2, 0:2]
         eig_val, eig_vec = np.linalg.eig(Pxy)

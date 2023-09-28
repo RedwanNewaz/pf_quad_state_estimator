@@ -4,7 +4,7 @@ import numpy as np
 from RosInterface import Bebop2StateEstimator
 
 NP = 1000  # Number of Particle
-DT = 0.035  # time tick [s]
+DT = 0.03  # time tick [s]
 STATE_DIM = 8 # state variable dimension
 
 
