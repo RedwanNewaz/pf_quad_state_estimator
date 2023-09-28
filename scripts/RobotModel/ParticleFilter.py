@@ -14,7 +14,7 @@ class ParticleFilter:
         self.NUM_MAX_THREADS = 6
 
         # initialize particle distribution from noisy landmark observations
-        pdf = estimate_zx(Z0, landmarks, np.pi / 2.0)
+        pdf = estimate_zx(Z0, landmarks)
         if len(pdf) > 0:
             K = NP // len(pdf)  # number of particle groups
         else:
@@ -38,7 +38,7 @@ class ParticleFilter:
     def estimate_control(self, Z):
         u = None
         if len(Z):
-            zx = estimate_zx(Z, self.landmarks, self.z_t_1[3, 0]).mean(axis=0).reshape((4, 1))
+            zx = estimate_zx(Z, self.landmarks).mean(axis=0).reshape((4, 1))
             dx = zx - self.z_t_1
             v = dx / self.DT
             self.z_t_1 = zx.copy()

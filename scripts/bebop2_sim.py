@@ -3,7 +3,7 @@ import rospy
 import numpy as np 
 import math 
 from RobotModel import ParticleFilter
-from RobotModel import observation_model, estimate_zx
+from RobotModel import observation_model
 from RosInterface import Bebop2StateViz
 from RosInterface import Bebop2StateEstimator
 from geometry_msgs.msg import Point

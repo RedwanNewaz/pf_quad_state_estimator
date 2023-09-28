@@ -1,0 +1,12 @@
+<launch>
+    <include file="$(find bebop2_state_estimator)/launch/bebop_autonomy.launch" />
+    <include file="$(find bebop2_state_estimator)/launch/bebop_apriltag.launch" />
+    <node name="bebop2_state_estimator" pkg="bebop2_state_estimator" type="bebop2_state_estimator_node.py" output="screen"/>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d /home/roboticslab/catkin_ws/src/bebop2_state_estimator/config/bebop2.rviz"/>
+    
+    <node pkg="tf" type="static_transform_publisher" name="mapTag3" args="0.81 7.0 1.2 0 0 0 /map /tag3  10"/>
+    <node pkg="tf" type="static_transform_publisher" name="mapTag2" args="1.96 7.0 1.2 0 0 0 /map /tag3  10"/>
+    <node pkg="tf" type="static_transform_publisher" name="mapTag7" args="3.11 7.0 1.2 0 0 0 /map /tag3  10"/>
+    <node pkg="tf" type="static_transform_publisher" name="mapTag4" args="4.26 7.0 1.2 0 0 0 /map /tag3  10"/>
+    
+</launch>

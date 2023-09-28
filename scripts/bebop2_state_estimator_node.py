@@ -9,7 +9,8 @@ STATE_DIM = 8 # state variable dimension
 
 
 # TAG_ID positions [x, y, z]
-tag_id = np.array([[1.96, 7.0, 1.2],
+tag_id = np.array([ [0.81, 7.0, 1.2],
+                    [1.96, 7.0, 1.2],
                     [3.11, 7.0, 1.2],
                     [4.26, 7.0, 1.2]])
 tag_id = np.expand_dims(tag_id, axis=2)
