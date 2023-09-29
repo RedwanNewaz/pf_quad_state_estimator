@@ -11,7 +11,7 @@ class ParticleFilter:
         self.DT = DT
         self.NP = NP
 
-        self.NUM_MAX_THREADS = 6
+        self.NUM_MAX_THREADS = 12
 
         # initialize particle distribution from noisy landmark observations
         pdf = estimate_zx(Z0, landmarks)
