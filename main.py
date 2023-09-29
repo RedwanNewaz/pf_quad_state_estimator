@@ -4,13 +4,14 @@ import math
 from RobotModel import observation_model, get_noisy_reading
 from RobotModel import ParticleFilter
 from scipy.spatial.transform import Rotation as Rot
+from test.eight import calc_input
 
 NP = 1000  # Number of Particle
 DT = 0.1  # time tick [s]
 STATE_DIM = 8 # state variable dimension
 CTRL_DIM = 4 # control variable dimension
 
-L = 6 # length of workspace [m]
+
 
 
 def rot_mat_2d(angle):
@@ -33,19 +34,7 @@ def rot_mat_2d(angle):
     """
     return Rot.from_euler('z', angle).as_matrix()[0:2, 0:2]
 
-def calc_input():
-    SIM_TIME = 200  # total simulation time
-    N = SIM_TIME // 4  # each arm traversing time
-    v = L / (N * DT)
-    u_f = np.array([[0, v, 0, 0] for _ in range(N)])
-    u_r = np.array([[v, 0, 0, 0] for _ in range(N)])
-    u_b = np.array([[0, -v, 0, 0] for _ in range(N)])
-    u_l = np.array([[-v, 0, 0, 0] for _ in range(N)])
 
-    U = np.vstack((u_f, u_r, u_b, u_l)).reshape((SIM_TIME, CTRL_DIM, 1))
-
-    for u in U:
-        yield u
 
 
 def plot_covariance_ellipse(xEst, PEst):  # pragma: no cover
@@ -130,7 +119,7 @@ def main():
         plt.scatter(x_est[0, 0], x_est[1, 0])
         plot_covariance_ellipse(x_est, p_est)
 
-        plt.axis([-2, L + 2, -2, L + 2])
+        plt.axis([-2, 6 + 2, -2, 6 + 2])
         plt.pause(DT)
 
 
