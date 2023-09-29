@@ -90,36 +90,7 @@ class Bebop2StateEstimator(StateEstimator):
 
     def get_observation(self, z):
 
-        if not len(z):
-            return []
-        
-        _angle = np.array([-obs[-2] for obs in z]).mean()
-        # _angle = []
-        # for obs in z:
-        #     y = -obs[-2] 
-        #     landmarkID = int(obs[-2])
-        #     x0 = self.landmarks[landmarkID, 0]
-        #     y0 = self.landmarks[landmarkID, 1]
-        #     z0 = self.landmarks[landmarkID, 2]
-
-        #     alpha = math.atan2(y0, x0)
-        #     theta = pi_2_pi(math.pi/2 + y - alpha)
-        #     _angle.append(theta)
-        
-        # _angle = np.array(_angle).mean()
-
-
-        if np.isnan(_angle):
-            return []
-        
-        alpha = 0.95
-        if not self.h_angle:
-           self.h_angle = _angle  
-        else: 
-            self.h_angle = self.h_angle * alpha + (1 - alpha) * _angle
-
-        # print(f"h_angle = {self.h_angle:.3f} | _angle = {_angle}")
-
+      
         z_meas = np.zeros((0, 5))
         for obs in z:
             landmarkID = int(obs[-2])
@@ -131,8 +102,10 @@ class Bebop2StateEstimator(StateEstimator):
             d1 = math.hypot(x0, y0, z0)
             alpha = np.arccos(z0 / d1)
 
+            h_angle = pi_2_pi(math.pi/2 - obs[-3])
+
             # phi2 = np.sign(y0) * np.arccos(x0 / np.sqrt(x0**2 + y0**2))
-            theta2 = pi_2_pi(math.pi/2 + self.h_angle - alpha)
+            theta2 = pi_2_pi(math.pi/2 + h_angle - alpha)
 
             rotation_matrix = self.rotation_matrix_yaw(theta2)
             translation = np.array([obs[0], obs[1], obs[2]])
@@ -147,7 +120,7 @@ class Bebop2StateEstimator(StateEstimator):
 
             landmarkID = int(obs[-1])
             
-            zi = np.array([d, phi, theta, landmarkID, self.h_angle ])
+            zi = np.array([d, phi, theta, landmarkID, h_angle ])
             z_meas = np.vstack((z_meas, zi))
             
             
@@ -156,54 +129,6 @@ class Bebop2StateEstimator(StateEstimator):
             # print(len(z))
             self.map_observation(z_meas)
 
-
-
-       
-        # points = []
-        # for obs in z:
-        #     # x, y, z, r, p, y, id
-        #     landmarkID = int(obs[-1])
-        #     x0 = self.landmarks[landmarkID, 0]
-        #     y0 = self.landmarks[landmarkID, 1]
-        #     z0 = self.landmarks[landmarkID, 2]
-
-        #     rotation_matrix = self.rotation_matrix_yaw(self.h_angle)
-        #     translation = np.array([obs[0], obs[1], obs[2]])
-
-        #     initial_point = np.array([x0, y0, z0])
-        #     transformed_point = initial_point - np.dot(rotation_matrix, translation)  
-        #     xx, yy, zz = transformed_point
-        #     self.coord = [xx, yy, zz, self.h_angle]  
-        #     points.append(self.coord)
-
-
-           
-
-        # return points
-
-    # def viz_estimated_landmarks(self, z):
-    #     robot_landmark_coord = map(convert_spherical_to_cartesian, z)
-    #     point_list = []
-    #     for x in robot_landmark_coord:
-    #         x0 = np.squeeze(self.xEst)[:3]
-    #         l0 = x0 + x[:3]
-    #         # print(l0)
-    #         detectedLandmark = Point()
-    #         detectedLandmark.x = l0[0]
-    #         detectedLandmark.y = l0[1]
-    #         detectedLandmark.z = l0[2]
-
-    #         robotPosition = Point()
-    #         robotPosition.x = x0[0]
-    #         robotPosition.y = x0[1]
-    #         robotPosition.z = x0[2]
-
-    #         point_list.append(robotPosition)
-    #         point_list.append(detectedLandmark)
-    #         point_list.append(detectedLandmark)
-    #         point_list.append(robotPosition)
-
-    #     self.viz.add_observation(point_list)
 
     def map_observation(self, z):
 
