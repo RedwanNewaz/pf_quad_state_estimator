@@ -75,8 +75,8 @@ class SimStateEstimator:
         self.tag_id = np.expand_dims(tag_id, axis=2)
         self.FOV = FOV
 
-        self.x_true = np.zeros((STATE_DIM, 1))
-        self.x_true[3, 0] = np.pi / 2.0  # init heading 90
+        self.x_true = self.x_est = np.zeros((STATE_DIM, 1))
+        self.x_true[3, 0] = self.x_est[3, 0] = np.pi / 2.0  # init heading 90
 
         # initialize particle filter
 

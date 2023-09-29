@@ -2,8 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from RobotModel import get_noisy_reading
 
-from Simulator import SimStateEstimator
+from Simulator import SimStateEstimator, WaypointController
 from test.eight import calc_input
+from test.ReadCsv import read_csv
+from queue import Queue
+
+
 
 NP = 1000  # Number of Particle
 DT = 0.1  # time tick [s]
@@ -52,6 +56,61 @@ def main():
         plt.axis([-2, 8, -2, 8])
         plt.pause(DT)
 
+def main_with_arg():
+    print(__file__ + " start!!")
+
+    # TAG_ID positions [x, y, z]
+    tag_id = np.array([[0.88, 7.0, 1.2],
+                      [2.03, 7.0, 1.2],
+                      [3.18, 7.0, 1.2],
+                      [4.33, 7.0, 1.2]])
+    FOV = np.rad2deg(120)
+
+    sim = SimStateEstimator(tag_id, FOV)
+
+    filename = 'test/traj/traj_eight.csv'
+    wps = read_csv(filename)
+
+    q = Queue()
+    wpc = WaypointController(wps, q)
+    wpc.start()
+    traj = np.zeros((0, 2))
+
+    while not wpc.terminated:
+
+        while not q.empty():
+            u = q.get()
+            print('[main]: control = ', u.T)
+            Z = sim(u)
+            wpc.xEst[:4, :] = sim.x_est[:4, :]
+
+            plt.cla()
+            for i, z in enumerate(Z):
+                x_noise = get_noisy_reading(sim.x_true, z[:3])
+                Xn = [sim.x_est[0, 0], x_noise[0]]
+                Yn = [sim.x_est[1, 0], x_noise[1]]
+                plt.plot(Xn, Yn, '--k')
+
+
+            # show trajectory
+            traj_i = np.array([sim.x_est[0, 0], sim.x_est[1, 0]])
+            traj = np.vstack((traj, traj_i))
+            plt.plot(traj[:, 0], traj[:, 1], ".r", alpha=0.2)
+
+
+            # plt.plot(px[0, :], px[1, :], ".r", alpha=0.2)
+            plt.scatter(tag_id[:, 0], tag_id[:, 1])
+            plt.scatter(sim.x_true[0, 0], sim.x_true[1, 0])
+            plt.scatter(sim.x_est[0, 0], sim.x_est[1, 0])
+
+            # plot_covariance_ellipse
+            px, py = sim.get_cov_ellipse()
+            plt.plot(px, py, "--g")
+
+            plt.axis([-2, 8, -2, 8])
+            plt.pause(DT)
+
+
 
 if __name__ == '__main__':
-    main()
+    main_with_arg()
