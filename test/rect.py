@@ -1,5 +1,5 @@
 import numpy as np
-from ToCsv import write_csv
+from .ToCsv import write_csv
 
 DT = 0.1  # time tick [s]
 
