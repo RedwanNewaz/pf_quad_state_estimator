@@ -244,8 +244,8 @@ class Bebop2StateEstimator(StateEstimator):
 
         cov = np.zeros((6, 6), dtype=np.float64)
         cov[:3, :3] = pEst[:3, :3]
-        cov[5, 5] = pEst[2, 2]
-        cov[5, :3] = pEst[2, :3]
+        cov[5, 5] = pEst[3, 3]
+        cov[5, :3] = pEst[3, :3]
         odom.pose.covariance = cov.flatten().tolist()
 
         self.state_pub.publish(odom)
