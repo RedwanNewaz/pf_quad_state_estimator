@@ -1,6 +1,9 @@
 import numpy as np
+from ToCsv import write_csv
 
 DT = 0.1  # time tick [s]
+
+
 def calc_input():
     L = 6  # length of workspace [m]
     SIM_TIME = 200  # total simulation time
@@ -15,3 +18,9 @@ def calc_input():
 
     for u in U:
         yield u
+
+
+if __name__ == '__main__':
+    filename = 'traj/traj_rect.csv'
+    control = calc_input()
+    write_csv(csv_file=filename, gen=control, DT=DT)

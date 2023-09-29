@@ -1,7 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from ToCsv import write_csv
 
 DT = 0.1  # time tick [s]
+
+
 
 def calc_input():
     # Define a parameter t
@@ -22,10 +25,7 @@ def calc_input():
 
 
 if __name__ == '__main__':
-    X = np.zeros((4, 1))
+    filename = 'traj/traj_eight.csv'
+    control = calc_input()
+    write_csv(csv_file=filename, gen=control, DT=DT)
 
-    for u in calc_input():
-        X = X + u
-        plt.scatter(X[0, 0], X[1, 0], color='k')
-        plt.axis([-2, 6 + 2, -2, 6 + 2])
-        plt.pause(DT)
